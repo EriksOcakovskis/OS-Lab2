@@ -38,7 +38,7 @@ Back up `/etc/fstab`.
 
     cp /etc/fstab /etc/fstab_backup
 
-Open `/dev/sdb1` with your favorite text editor.
+Open `/etc/fstab` with your favorite text editor.
 
     nano /etc/fstab
 
@@ -58,6 +58,7 @@ Or
 
     chgrp lab-linux /var/data/lab-linux
 
+
     chmod 070 /var/data/lab-linux
 
 ## For MS Windows users
@@ -75,6 +76,7 @@ Append the following, by replacing `<hash>` and `gid` by actual group id that yo
 
     UUID=<hash> /var/data/lab-windows  ntfs-3g  gid=1002,umask=0707  0  0
 
+
     mount -a
     chown :lab-windows /var/data/lab-windows/
     chmod 070 /var/data/lab-windows/
@@ -91,6 +93,7 @@ Install support for macOS file system
 
     apt install hfsprogs
 
+
     mkdir -p /var/data/lab-mac && groupadd lab-mac
     cfdisk /dev/sdd
     mkfs.hfsplus /dev/sdd1
@@ -101,6 +104,7 @@ Install support for macOS file system
 Append the following, by replacing `<hash>` and `gid` by actual group id that you can find by running `cat /etc/group | grep mac`.
 
     UUID=<hash> /var/data/lab-mac  hfsplus  gid=1003,umask=0707  0  0
+
 
     mount -a
     chown :lab-mac /var/data/lab-mac/
@@ -116,6 +120,7 @@ Instead of file system we create a swap area.
 
     mkswap /dev/sde1
 
+
     blkid /dev/sde1
     cp /etc/fstab /etc/fstab_backup
     nano /etc/fstab
@@ -123,6 +128,7 @@ Instead of file system we create a swap area.
 Append the following, by replacing `<hash>` with with actual UUID you got from `blkid /dev/sde1`.
 
     UUID=<hash>  none  swap  sw  0  0
+
 
     mount -a
 
@@ -143,6 +149,7 @@ Set the swappiness parameter to ten.
 Edit the `/etc/sysctl.conf` file and add following line:
 
     vm.swappiness = 10
+
 
     swapoff /dev/sde1
     swapon -a
