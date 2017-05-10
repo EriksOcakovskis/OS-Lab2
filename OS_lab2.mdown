@@ -1,0 +1,160 @@
+# Lab2
+
+## Connectivity configuration for sysadmins
+
+Please see previous [lab](https://github.com/EriksOcakovskis/OS-Lab1/blob/master/OS_lab1.mdown) for instructions on how to [configure network](https://github.com/EriksOcakovskis/OS-Lab1/blob/master/OS_lab1.mdown#static-ip) and [SSH connectivity](https://github.com/EriksOcakovskis/OS-Lab1/blob/master/OS_lab1.mdown#setup-ssh-connection-with-ed25519-sha-512-algorithm).
+
+Follow the [link](https://github.com/EriksOcakovskis/OS-Lab1/blob/master/OS_lab1.mdown#configure-keyboard-language) to configure keyboard on server if you prefer US layout.
+
+Root up.
+
+    sudo -i
+
+## For GNU/Linux users
+
+### Please create a folder /var/data/lab-linux and user group lab-linux.
+
+    mkdir -p /var/data/lab-linux && groupadd lab-linux
+
+### Please create to new disk one primary partition ext4 file system with 4 GiB.
+
+Create one new primary partition with size of 4 GiB.
+
+    cfdisk /dev/sdb
+
+Follow instructions on screen, last step is to write changes to disk and confirm those changes by typing `yes`.
+
+Format that partition to ext4 file system
+
+    mkfs.ext4 /dev/sdb1
+
+### Please configure newly created partition to be mounted automatically under /var/data/lab-linux using UUID
+
+First find UUID of newly created partition `/dev/sdb1`.
+
+    blkid /dev/sdb1
+
+Back up `/etc/fstab`.
+
+    cp /etc/fstab /etc/fstab_backup
+
+Open `/dev/sdb1` with your favorite text editor.
+
+    nano /etc/fstab
+
+Append the following and replace `<hash>` with actual UUID you got from `blkid /dev/sdb1`.
+
+    UUID=<hash> /var/data/lab-linux  ext4  defaults  0  0
+
+Check if you did not mess up writing `/etc/fstab`.
+
+    mount -a
+
+### Please configure permissions for /var/data/lab-linux so that only members in lab-linux group (certainly the superuser can access regardless of permissions) can read and write to that folder and no one else.
+
+    chown :lab-linux /var/data/lab-linux
+
+Or
+
+    chgrp lab-linux /var/data/lab-linux
+
+    chmod 070 /var/data/lab-linux
+
+## For MS Windows users
+
+### Steps and requirements are very similar to previous part, I will comment only parts that change.
+
+    mkdir -p /var/data/lab-windows && groupadd lab-windows
+    cfdisk /dev/sdc
+    mkfs.ntfs /dev/sdc1
+    blkid /dev/sdc1
+    cp /etc/fstab /etc/fstab_backup
+    nano /etc/fstab
+
+Append the following, by replacing `<hash>` and `gid` by actual group id that you can find by running `cat /etc/group | grep windows`.
+
+    UUID=<hash> /var/data/lab-windows  ntfs-3g  gid=1002,umask=0707  0  0
+
+    mount -a
+    chown :lab-windows /var/data/lab-windows/
+    chmod 070 /var/data/lab-windows/
+
+## For macOS users
+
+### Steps and requirements are very similar to previous part, I will comment only parts that change.
+
+Update repository package list
+
+    apt update
+
+Install support for macOS file system
+
+    apt install hfsprogs
+
+    mkdir -p /var/data/lab-mac && groupadd lab-mac
+    cfdisk /dev/sdd
+    mkfs.hfsplus /dev/sdd1
+    blkid /dev/sdd1
+    cp /etc/fstab /etc/fstab_backup
+    nano /etc/fstab
+
+Append the following, by replacing `<hash>` and `gid` by actual group id that you can find by running `cat /etc/group | grep mac`.
+
+    UUID=<hash> /var/data/lab-mac  hfsplus  gid=1003,umask=0707  0  0
+
+    mount -a
+    chown :lab-mac /var/data/lab-mac/
+    chmod 070 /var/data/lab-mac/
+
+## Swap area configuration
+
+### Steps and requirements are very similar to previous part, I will comment only parts that change.
+
+    cfdisk /dev/sde
+
+Instead of file system we create a swap area.
+
+    mkswap /dev/sde1
+
+    blkid /dev/sde1
+    cp /etc/fstab /etc/fstab_backup
+    nano /etc/fstab
+
+Append the following, by replacing `<hash>` with with actual UUID you got from `blkid /dev/sde1`.
+
+    UUID=<hash>  none  swap  sw  0  0
+
+    mount -a
+
+Test swap
+
+    swapon -a
+
+### Please configure swappiness and replace default value 60 with 10 permanently
+
+Check the current value for swappiness.
+
+    /sbin/sysctl -a | grep swappiness
+
+Set the swappiness parameter to ten.
+
+    echo 10 > /proc/sys/vm/swappiness
+
+Edit the `/etc/sysctl.conf` file and add following line:
+
+    vm.swappiness = 10
+
+    swapoff /dev/sde1
+    swapon -a
+
+# Shutdown the system
+
+    systemctl poweroff / halt
+
+Or
+
+    sudo poweroff / halt
+
+# Pastebin sample
+
+[link](http://paste.ubuntu.com/24547649/)
